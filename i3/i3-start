@@ -1,0 +1,26 @@
+#!/bin/bash
+# Log everything for debugging
+exec > /home/atlante/i3-debug.log 2>&1
+echo "i3-start script triggered at $(date)"
+
+# Initialize the session environment
+export DESKTOP_SESSION=i3
+export XDG_CURRENT_DESKTOP=i3
+export XDG_SESSION_TYPE=x11
+
+# Ensure D-Bus is running
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    echo "Starting dbus-launch..."
+    eval $(dbus-launch --sh-syntax --exit-with-session)
+fi
+
+# Start the keyring daemon for Chrome/logins
+echo "Starting gnome-keyring..."
+eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
+
+# Force a background color so we know the screen is alive
+# This requires xsetroot, which is usually installed
+xsetroot -solid "#222222"
+
+echo "Launching i3..."
+exec /usr/bin/i3 -V
